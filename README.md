@@ -31,7 +31,7 @@ Place the codebook in your top-level directory. It should be a CSV should be for
    code1 , description1
    code2 , description2
    ...
-   code3, description3
+   code3 , description3
 ```
 where codes are (possibly quote-surrounded) strings and descriptions are (possibly quote-delimited) strings. We will eat extra ',' appearing at end of lines.
 
@@ -55,7 +55,7 @@ You should then use the reformatted transcripts in your output directory for ste
 This repo contains a script (``code-extract.py``) that will process either a directory of transcripts or a list of transcripts. Usage is as follows:
 
 ```cli
-python code-extract.py [update] <project title>  <output directory> <codebook> [master.csv] <csv1> [<csv2>] ...
+python code-extract.py [update] <project title> <output directory> <codebook> [master.csv] <csv1> [<csv2>] ...
 python code-extract.py [update] <project title> <output directory> <codebook> [master.csv] <csv directory> ...
 ```
 

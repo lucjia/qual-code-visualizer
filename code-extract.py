@@ -43,7 +43,7 @@ import operator
 from pathlib import Path
 
 from util import urlSafe, stripQuotesSpace, mergeCodes
-from generators import genIndex, genHistograms, genCodeHTML, genCodeCounts, genCodeCSV, genCodePerTransHTML, genHeaderMenu, genPosterHTML, genStylesheet
+from generators import genIndex, genCodeHTML, genCodeCounts, genCodeCSV, genCodePerTransHTML, genHeaderMenu, genPosterHTML, genStylesheet # genHistograms,
 
 
 ################################################################################
@@ -125,18 +125,26 @@ class Thread(object):
 
   def toHTML(self):
     """ Prints HTML for this thread to a file in output directory """
-    filename = "{}/html/{}.html".format(self.outFileDir, self.outFileBase)
+    filename = "{}/html/{}_interview.html".format(self.outFileDir, self.outFileBase)
     print('writing interview: ', filename)
     with open( filename, 'w' ) as outFile:   # Should be of form, e.g., Johnson.html
       header = self.outFileBase
       page = markup.page()
       page = genHeaderMenu(page, header)
 
-      page.div(class_="num_posts")
-      page.add("quotes={}".format(len(self.posts)))
+      page.div(class_="submenu")
+      page.a("codes", color="blue", href="{}.html".format(header))
+      page.add("&nbsp;&nbsp;-&nbsp;&nbsp;")
+      page.a("interviews", color="blue", href="{}_interviews.html".format(header))
+      page.add("&nbsp;&nbsp;-&nbsp;&nbsp;")
+      page.a("quotes", color="blue", href="{}_quotes.html".format(header))
       page.div.close()
 
-      page.table( style="width: 100%" )
+      page.div(class_="num_posts")
+      page.add("quotes = {}".format(len(self.posts)))
+      page.div.close()
+
+      page.table( style="width: 95%" )
 
       page.tr(class_="table-header")
       page.th('speaker')
@@ -408,7 +416,7 @@ def main():
       threads, codeCounts, posters = readOriginalCSVs( originalCSVs, codes, outputdir, codeCounts )
 
       # Generate a histogram HTML page
-      genHistograms( threads, outputdir, codeCounts, project_title )
+      # genHistograms( threads, outputdir, codeCounts, project_title )
 
       # Write code_counts.csv
       genCodeCounts( codeCounts, outputdir )
@@ -442,7 +450,7 @@ def main():
     genStylesheet( outputdir )
 
     # Print a direct link to the index file for viewing
-    print('\nDone! View output at: {}'.format(os.path.abspath(outputdir+'/html/index.html')))
+    print('\nDone! View output at: {}'.format(os.path.abspath(outputdir+'/html/0_index.html')))
 
 if __name__ == '__main__':
   main()

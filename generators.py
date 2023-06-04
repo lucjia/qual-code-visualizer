@@ -17,6 +17,11 @@ from util import urlSafe
 # HTML generators
 ################################################################################
 
+def genFreqSortedCodeCounts(codeCounts):
+	sortedCodeCounts = sorted(codeCounts.items(), key=lambda tup: tup[1]['posts'], reverse=True)
+	# print(sortedCodeCounts)
+	return sortedCodeCounts
+
 
 def genIndex(threads, outputdir, codeCounts, project_title):
 	""" Generates an index linking to all the main pages.
@@ -37,48 +42,65 @@ def genIndex(threads, outputdir, codeCounts, project_title):
 				Writes index to file, does not return
 	"""
 
-	freqSortedCodes = sorted(codeCounts.items(), key=lambda tup: len(tup[1]['threads']), reverse=True)
+	freqSortedCodeCounts = genFreqSortedCodeCounts(codeCounts)
 
-	with open(outputdir + '/html/' + 'index.html', 'w') as outFile:
+	with open(outputdir + '/html/' + '0_index.html', 'w') as outFile:
 		header = "{}: Coded Transcripts".format(project_title)
 		page = markup.page()
 		page = genHeaderMenu(page, header)
 
-		page.table(style="width: 100%")
+		page.add('<h1>codes (n = {})</h1>'.format(len(freqSortedCodeCounts)))
+		
+		page.div(class_="spacer-10")
+		page.div.close()
 
-		# Write codes header
-		page.tr()
-		page.td(class_="index-header")
-		page.add('<h1>codes (n={})</h1>'.format(len(freqSortedCodes)))
-		page.td.close()
+		page.table(style="width: 95%; table-layout: fixed", id_="table")
+
+		# Header
+		
+		page.tr(class_="table-header")
+		page.th('code', width="40%")
+		page.th('# distinct quotes', width="15%")
+		page.th('# distinct interviews', width="15%")
+		page.th('# distinct speakers', width="15%")
+		page.th('speakers', width="25%")
 		page.tr.close()
 
 		# Write sorted list of codes with frequencies
-		page.tr()
-		page.td(class_="index-codes")
-		for codeFreqPair in freqSortedCodes:
-			code = codeFreqPair[0]
-			post_count = codeFreqPair[1]['posts']
-			thread_count = len(codeFreqPair[1]['threads'])
-			page.div(class_="index-code")
-			page.a(code, href=urlSafe(code) + '.html')
-			page.add(' &nbsp;&nbsp;(quotes={}, interviews={})'.format(
-														post_count, thread_count))
-			page.div.close()
-			#page.add('&nbsp;&nbsp;-&nbsp;&nbsp;')
-		page.td.close()
-		page.tr.close()
+
+		for freqSortedCodeCount in freqSortedCodeCounts:
+			code = freqSortedCodeCount[0]
+			post_count = freqSortedCodeCount[1]['posts']
+			posters = freqSortedCodeCount[1]['posters']
+			thread_count = freqSortedCodeCount[1]['threads']
+			page.tr()
+			page.td()
+			page.a(code, href="{}.html".format(urlSafe(code)))
+			page.td.close()
+			page.td(str(post_count))
+			page.td(str(len(thread_count)))
+			page.td(str(len(posters)))
+			page.td(class_="histogram-posters")
+			for poster in posters:
+				page.a(poster, href="{}.html".format(urlSafe(poster)))
+			page.td.close()
+			page.tr.close()
+
+		page.table.close()
 
 		num_posts = 0
 		for thread in threads:
 			num_posts += len(thread.posts)
 
 		# Write threads header
-		page.tr()
-		page.td(class_="index-header")
-		page.add('<h1>interviews (n={}, quotes={})</h1>'.format(len(threads), num_posts))
-		page.td.close()
-		page.tr.close()
+		page.div(class_="spacer-10")
+		page.div.close()
+		page.add('<h1>interviews (n = {}, quotes = {})</h1>'.format(len(threads), num_posts))
+		
+		page.div(class_="spacer-10")
+		page.div.close()
+
+		page.table(style="width: 95%; table-layout: fixed", id_="table")
 
 		# Write sorted list of threads
 		page.tr()
@@ -96,62 +118,62 @@ def genIndex(threads, outputdir, codeCounts, project_title):
 	outFile.close()
 
 
-def genHistograms(threads, outputdir, codeCounts, project_title):
-	""" Generates an index linking to all the main pages.
-			Inputs:
-				threads <list>: list of thread objects
-				outputdir <str>: directory for output specified in arguments
-				codeCounts <dict>: counts per code, processed in readOriginalCSVs
-					{
-						code1: {
-							'threads': <set> of the distinct titles of threads with this code,
-							'posts': <int> count of number of posts for this code,
-							'posters': <set> of the distinct posters who said something with this code,
-						}
-						...
-					}
-				project_title <str>: used to generate the page title in the format "<project_title>: Coded Transcripts"
-			Outputs:
-				Writes index to file, does not return
-	"""
-	freqSortedCodeCounts = sorted(
-		codeCounts.items(), key=lambda tup: len(tup[1]['threads']), reverse=True)
+# def genHistograms(threads, outputdir, codeCounts, project_title):
+# 	""" Generates an index linking to all the main pages.
+# 			Inputs:
+# 				threads <list>: list of thread objects
+# 				outputdir <str>: directory for output specified in arguments
+# 				codeCounts <dict>: counts per code, processed in readOriginalCSVs
+# 					{
+# 						code1: {
+# 							'threads': <set> of the distinct titles of threads with this code,
+# 							'posts': <int> count of number of posts for this code,
+# 							'posters': <set> of the distinct posters who said something with this code,
+# 						}
+# 						...
+# 					}
+# 				project_title <str>: used to generate the page title in the format "<project_title>: Coded Transcripts"
+# 			Outputs:
+# 				Writes index to file, does not return
+# 	"""
 
-	with open(outputdir + '/html/' + 'histograms.html', mode='w+') as outFile:
-		header = "{}: Histograms".format(project_title)
-		page = markup.page()
-		page = genHeaderMenu(page, header)
+# 	freqSortedCodeCounts = genFreqSortedCodeCounts(codeCounts)
 
-		page.table(style="width: 100%", id_="histograms-table")
+# 	with open(outputdir + '/html/' + 'histograms.html', mode='w+') as outFile:
+# 		header = "{}: Histograms".format(project_title)
+# 		page = markup.page()
+# 		page = genHeaderMenu(page, header)
 
-		page.tr(class_="table-header")
-		page.th('code')
-		page.th('# distinct interviews')
-		page.th('# distinct quotes')
-		page.th('# distinct speakers')
-		page.th('speakers')
-		page.tr.close()
-		for freqSortedCodeCount in freqSortedCodeCounts:
-			code = freqSortedCodeCount[0]
-			posters = freqSortedCodeCount[1]['posters']
-			threads = freqSortedCodeCount[1]['threads']
-			post_count = freqSortedCodeCount[1]['posts']
-			page.tr()
-			page.td()
-			page.a(code, href="{}.html".format(urlSafe(code)))
-			page.td.close()
-			page.td(str(len(threads)))
-			page.td(str(post_count))
-			page.td(str(len(posters)))
-			page.td(class_="histogram-posters")
-			for poster in posters:
-				page.a(poster, href="{}.html".format(urlSafe(poster)))
-			page.td.close()
-			page.tr.close()
-		page.table.close()
+# 		page.table(style="width: 95%; table-layout: fixed", id_="table")
 
-		outFile.write(str(page))
-	outFile.close()
+# 		page.tr(class_="table-header")
+# 		page.th('code')
+# 		page.th('# distinct interviews')
+# 		page.th('# distinct quotes')
+# 		page.th('# distinct speakers')
+# 		page.th('speakers')
+# 		page.tr.close()
+# 		for freqSortedCodeCount in freqSortedCodeCounts:
+# 			code = freqSortedCodeCount[0]
+# 			posters = freqSortedCodeCount[1]['posters']
+# 			thread_count = freqSortedCodeCount[1]['threads']
+# 			post_count = freqSortedCodeCount[1]['posts']
+# 			page.tr()
+# 			page.td()
+# 			page.a(code, href="{}.html".format(urlSafe(code)))
+# 			page.td.close()
+# 			page.td(str(len(thread_count)))
+# 			page.td(str(post_count))
+# 			page.td(str(len(posters)))
+# 			page.td(class_="histogram-posters")
+# 			for poster in posters:
+# 				page.a(poster, href="{}.html".format(urlSafe(poster)))
+# 			page.td.close()
+# 			page.tr.close()
+# 		page.table.close()
+
+# 		outFile.write(str(page))
+# 	outFile.close()
 
 # Generators for code page
 
@@ -171,7 +193,7 @@ def genCodePostsHTML(threads, outputdir, code, project_title):
 					 href="{}_interviews.html".format(urlSafe(code)))
 		page.div.close()
 
-		page.table(style="width: 100%; table-layout: fixed; max-width: 90vw")
+		page.table(style="width: 95%; table-layout: fixed")
 
 		page.tr(class_="table-header")
 		page.th('speaker', width="15%")
@@ -204,7 +226,7 @@ def genCodePostsHTMLReddit(threads, outputdir, code, project_title):
 					 href="{}_interviews.html".format(urlSafe(code)))
 		page.div.close()
 
-		page.table(style="width: 100%; table-layout: fixed; max-width: 90vw")
+		page.table(style="width: 95%; table-layout: fixed")
 
 		page.tr(class_="table-header")
 		page.th('speaker', width="15%")
@@ -235,11 +257,11 @@ def genCodeThreadsHTML(threads, outputdir, code, project_title):
 		page.div(class_="submenu")
 		page.a("quotes", color="blue", href="{}.html".format(urlSafe(code)))
 		page.add("&nbsp;&nbsp;-&nbsp;&nbsp;")
-		page.a("interviews (n={})".format(len(sorted_threads)),
+		page.a("interviews (n = {})".format(len(sorted_threads)),
 					 color="blue", href="{}_interviews.html".format(urlSafe(code)))
 		page.div.close()
 
-		page.table(style="width: 100%; table-layout: fixed; max-width: 90vw")
+		page.table(style="width: 95%; table-layout: fixed")
 
 		page.tr(class_="table-header")
 		page.th('interview', width="50%")
@@ -282,7 +304,7 @@ def genCodePerTransHTML(threads, outputdir, code):
 			page = markup.page()
 			page = genHeaderMenu(page, header)
 
-			page.table(style="width: 100%")
+			page.table(style="width: 95%")
 
 			for post in thread.posts:
 				if(code in post.codes):
@@ -313,13 +335,16 @@ def genPosterCodesHTML(poster, outputdir):
 		page.a("quotes", color="blue", href="{}_quotes.html".format(username))
 		page.div.close()
 
-		page.table(style="width: 100%; table-layout: fixed")
+		page.table(style="width: 95%; table-layout: fixed")
 
 		# First write a block for all the codes the poster engages with, and how often they posted something with that code
 
 		page.tr(class_="table-header")
-		page.add("<h1>codes (n={})</h1>".format(len(poster.codes)))
+		page.add("<h1>codes (n = {})</h1>".format(len(poster.codes)))
 		page.tr.close()
+
+		page.div(class_="spacer-10")
+		page.div.close()
 
 		page.tr(class_="table-header")
 		page.th("code")
@@ -357,18 +382,21 @@ def genPosterThreadsHTML(poster, outputdir):
 		page.a("quotes", color="blue", href="{}_quotes.html".format(username))
 		page.div.close()
 
-		page.table(style="width: 100%; table-layout: fixed")
+		page.table(style="width: 95%; table-layout: fixed")
 
 		# First write a block for all the codes the poster engages with, and how often they posted something with that code
 
 		page.tr(class_="table-header")
-		page.add("<h1>interviews (n={})</h1>".format(len(poster.threads)))
+		page.add("<h1>interviews (n = {})</h1>".format(len(poster.threads)))
 		page.tr.close()
+
+		page.div(class_="spacer-10")
+		page.div.close()
 
 		for thread_title in poster.threads:
 			page.tr(class_="poster-thread")
 			page.td()
-			page.a(thread_title, href="{}.html".format(urlSafe(thread_title)))
+			page.a(thread_title, href="{}_interview.html".format(urlSafe(thread_title)))
 			page.td.close()
 			page.tr.close()
 
@@ -393,13 +421,16 @@ def genPosterPostsHTML(poster, outputdir):
 		page.a("quotes", color="blue", href="{}_quotes.html".format(username))
 		page.div.close()
 
-		page.table(style="width: 100%; table-layout: fixed")
+		page.table(style="width: 95%; table-layout: fixed")
 
 		# First write a block for all the codes the poster engages with, and how often they posted something with that code
 
 		page.tr(class_="table-header")
-		page.add("<h1>quotes (n={})</h1>".format(len(poster.threads)))
+		page.add("<h1>quotes (n = {})</h1>".format(len(poster.threads)))
 		page.tr.close()
+
+		page.div(class_="spacer-10")
+		page.div.close()
 
 		for post in poster.posts:
 			post.printHTML(page, codeLinkTo="this_interview")
@@ -477,9 +508,9 @@ def genHeaderMenu(page, header):
 	page.div(id_="index-header")
 	page.add("<h1>{}</h1>".format(header))
 	page.div(id_="index-menu")
-	page.a("index", color="blue", href="index.html")
-	page.add("&nbsp;&nbsp;-&nbsp;&nbsp;")
-	page.a("histograms", color="blue", href="histograms.html")
+	page.a("index", color="blue", href="0_index.html")
+	# page.add("&nbsp;&nbsp;-&nbsp;&nbsp;")
+	# page.a("histograms", color="blue", href="histograms.html")
 	page.div.close()
 	page.div.close()
 	return page

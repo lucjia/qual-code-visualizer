@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
 body {
     box-sizing: border-box;
     margin: 0;
@@ -5,12 +7,13 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 100vw;
+    width: 100%;
+    font-family: 'Roboto', sans-serif;
   }
   
   h1 {
     margin: 0;
-    font-family: sans-serif;
+    font-family: 'Roboto', sans-serif;
   }
   
   /* INDEX-SPECIFIC STYLING */
@@ -28,14 +31,15 @@ body {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    font-family: sans-serif;
     margin: 1em;
   }
   
-  table{
+  table {
     border-collapse:collapse;
     max-width: 1500px;
-    width: 100%;
+    width: 95%;
+    margin-bottom: 30px;
+    position: relative;
   }
   
   table tr {
@@ -43,7 +47,13 @@ body {
   }
   
   th, td {
-  padding: 15px;
+  padding: 10px;
+  }
+
+  th {
+    position: sticky;
+    top: 0;
+    background-color: #D3D3D3;
   }
   
   td {
@@ -63,11 +73,19 @@ body {
   .index-code {
     flex-grow: 1
   }
+
+  table tr:nth-child(odd) td{
+    background-color: #FFFFFF
+  }
+  table tr:nth-child(even) td{
+    background-color: #F0F0F0
+  }
   
-  /* Histograms */
+  /* Histograms and Index */
   
-  #histograms-table {
+  #table {
     border: 1px solid #D3D3D3;
+    max-height: 500px;
   }
   
   .table-header {
@@ -91,3 +109,7 @@ body {
     font-weight: bold;
   }
   
+  /* Spacers */
+  .spacer-10 {
+    margin-bottom: 10px;
+  }
